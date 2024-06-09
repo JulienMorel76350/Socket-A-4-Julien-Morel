@@ -1,4 +1,4 @@
-const socket = io("http://192.168.0.99:3000");
+const socket = io("https://socket-a-4-julien-morel.onrender.com");
 const availableRoomsList = document.getElementById("availableRooms");
 const fullRoomsList = document.getElementById("fullRooms");
 const resultsDisplay = document.querySelector(".results");
