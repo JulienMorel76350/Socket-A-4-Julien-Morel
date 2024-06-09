@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pierre-Feuille-Ciseaux</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <nav class="navbar">
+        <h1>Mini-Jeux</h1>
+      </nav>
+      <div class="container">
+        <div id="sidebar" class="sidebar hidden">
+          <h2>Rooms</h2>
+          <button onclick="createRoom()">Create Room</button>
+          <div>
+            <h3>Available Rooms</h3>
+            <ul id="availableRooms"></ul>
+          </div>
+          <div>
+            <h3>Full Rooms (Spectators)</h3>
+            <ul id="fullRooms"></ul>
+          </div>
+        </div>
+        <div class="main">
+          <div id="login" class="login">
+            <h2>Enter your nickname</h2>
+            <input type="text" id="nickname" placeholder="Nickname" />
+            <button onclick="enterChat()">Enter Chat</button>
+          </div>
+          <div id="chatRoom" class="chat-room hidden">
+            <div class="game">
+              <h2>Choose your move</h2>
+              <button onclick="play('rock')">Rock</button>
+              <button onclick="play('paper')">Paper</button>
+              <button onclick="play('scissors')">Scissors</button>
+            </div>
+            <div class="results"></div>
+          </div>
+        </div>
+        <div id="wrapper_chat" class="wrapper_chat hidden">
+          <div class="chat-container">
+            <label for="chatMessage">Chat:</label>
+            <input type="text" id="chatMessage" placeholder="Type a message" />
+            <button onclick="sendMessage()">Send</button>
+            <ul class="chat"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script
+      src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+      integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+      crossorigin="anonymous"
+    ></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
