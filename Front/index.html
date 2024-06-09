@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,38 +13,38 @@
       </nav>
       <div class="container">
         <div id="sidebar" class="sidebar hidden">
-          <h2>Rooms</h2>
-          <button onclick="createRoom()">Create Room</button>
+          <h2>Salles</h2>
+          <button onclick="createRoom()">Créer une Salle</button>
           <div>
-            <h3>Available Rooms</h3>
+            <h3>Salles Disponibles</h3>
             <ul id="availableRooms"></ul>
           </div>
           <div>
-            <h3>Full Rooms (Spectators)</h3>
+            <h3>Salles Pleines (Spectateurs)</h3>
             <ul id="fullRooms"></ul>
           </div>
         </div>
         <div class="main">
           <div id="login" class="login">
-            <h2>Enter your nickname</h2>
-            <input type="text" id="nickname" placeholder="Nickname" />
-            <button onclick="enterChat()">Enter Chat</button>
+            <h2>Entrez votre pseudonyme</h2>
+            <input type="text" id="nickname" placeholder="Pseudonyme" />
+            <button onclick="enterChat()">Entrer dans le Chat</button>
           </div>
           <div id="chatRoom" class="chat-room hidden">
             <div class="game">
-              <h2>Choose your move</h2>
-              <button onclick="play('rock')">Rock</button>
-              <button onclick="play('paper')">Paper</button>
-              <button onclick="play('scissors')">Scissors</button>
+              <h2>Choisissez votre coup</h2>
+              <button onclick="play('rock')">Pierre</button>
+              <button onclick="play('paper')">Feuille</button>
+              <button onclick="play('scissors')">Ciseaux</button>
             </div>
             <div class="results"></div>
           </div>
         </div>
         <div id="wrapper_chat" class="wrapper_chat hidden">
           <div class="chat-container">
-            <label for="chatMessage">Chat:</label>
-            <input type="text" id="chatMessage" placeholder="Type a message" />
-            <button onclick="sendMessage()">Send</button>
+            <label for="chatMessage">Chat :</label>
+            <input type="text" id="chatMessage" placeholder="Tapez un message" />
+            <button onclick="sendMessage()">Envoyer</button>
             <ul class="chat"></ul>
           </div>
         </div>

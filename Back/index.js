@@ -41,11 +41,11 @@ io.on("connection", (socket) => {
 
     if (Object.keys(rooms[room].players).length < 2) {
       socket.join(room);
-      rooms[room].players[socket.id] = null;
+      rooms[room].players[socket.id] = null; // Pas de coup par défaut
       rooms[room].nicknames[socket.id] = nickname;
       io.to(room).emit(
         "message",
-        `${nickname} joined room ${room} as a player`
+        `${nickname} a rejoint la salle ${room} en tant que joueur`
       );
     } else {
       socket.join(room);
@@ -54,7 +54,7 @@ io.on("connection", (socket) => {
       rooms[room].queue.push(socket.id);
       io.to(room).emit(
         "message",
-        `${nickname} joined room ${room} as a spectator`
+        `${nickname} a rejoint la salle ${room} en tant que spectateur`
       );
     }
 
@@ -76,7 +76,7 @@ io.on("connection", (socket) => {
         delete rooms[room];
       }
 
-      io.to(room).emit("message", `${nickname} left room ${room}`);
+      io.to(room).emit("message", `${nickname} a quitté la salle ${room}`);
     }
     checkQueue(room);
     io.emit("roomsUpdate", getAvailableRooms());
@@ -107,7 +107,9 @@ io.on("connection", (socket) => {
 
       rooms[room].results.push({
         player1: rooms[room].nicknames[player1],
+        choice1,
         player2: rooms[room].nicknames[player2],
+        choice2,
         result,
       });
       io.to(room).emit("result", rooms[room].results);
@@ -125,7 +127,30 @@ io.on("connection", (socket) => {
   socket.on("chat", (room, message) => {
     io.to(room).emit("chat", message);
   });
-  socket.on("createRoom", (newRoom) => {
+
+  socket.on("createRoom", (newRoom, nickname) => {
+    const currentRooms = Array.from(socket.rooms).filter(
+      (r) => r !== socket.id
+    );
+    currentRooms.forEach((room) => {
+      if (room !== socket.id) {
+        socket.leave(room);
+        if (rooms[room]) {
+          const nickname = rooms[room].nicknames[socket.id];
+          delete rooms[room].players[socket.id];
+          delete rooms[room].spectators[socket.id];
+          delete rooms[room].nicknames[socket.id];
+          if (
+            Object.keys(rooms[room].players).length === 0 &&
+            Object.keys(rooms[room].spectateurs).length === 0
+          ) {
+            delete rooms[room];
+          }
+          io.to(room).emit("message", `${nickname} a quitté la salle ${room}`);
+        }
+      }
+    });
+
     if (!rooms[newRoom]) {
       rooms[newRoom] = {
         players: {},
@@ -134,24 +159,33 @@ io.on("connection", (socket) => {
         nicknames: {},
         queue: [],
       };
+      socket.join(newRoom);
+      rooms[newRoom].players[socket.id] = null; // Pas de coup par défaut
+      rooms[newRoom].nicknames[socket.id] = nickname;
       io.emit("roomsUpdate", getAvailableRooms());
+      io.to(newRoom).emit(
+        "message",
+        `${nickname} a créé et rejoint la salle ${newRoom} en tant que joueur`
+      );
     } else {
-      socket.emit("message", "Room already exists.");
+      socket.emit("message", "La salle existe déjà.");
     }
   });
 
   function checkQueue(room) {
-    if (
-      Object.keys(rooms[room].players).length < 2 &&
-      rooms[room].queue.length > 0
-    ) {
-      const nextPlayerId = rooms[room].queue.shift();
-      rooms[room].players[nextPlayerId] = null;
-      delete rooms[room].spectators[nextPlayerId];
-      io.to(room).emit(
-        "message",
-        `${rooms[room].nicknames[nextPlayerId]} joined room ${room} as a player`
-      );
+    if (rooms[room]) {
+      if (
+        Object.keys(rooms[room].players).length < 2 &&
+        rooms[room].queue.length > 0
+      ) {
+        const nextPlayerId = rooms[room].queue.shift();
+        rooms[room].players[nextPlayerId] = null; // Pas de coup par défaut
+        delete rooms[room].spectators[nextPlayerId];
+        io.to(room).emit(
+          "message",
+          `${rooms[room].nicknames[nextPlayerId]} a rejoint la salle ${room} en tant que joueur`
+        );
+      }
     }
   }
 
@@ -163,24 +197,24 @@ io.on("connection", (socket) => {
         delete rooms[room].nicknames[socket.id];
         if (
           Object.keys(rooms[room].players).length === 0 &&
-          Object.keys(rooms[room].spectators).length === 0
+          Object.keys(rooms[room].spectateurs).length === 0
         ) {
           delete rooms[room];
         }
         checkQueue(room);
-        io.to(room).emit("message", `${nickname} left room ${room}`);
-      } else if (rooms[room].spectators[socket.id]) {
+        io.to(room).emit("message", `${nickname} a quitté la salle ${room}`);
+      } else if (rooms[room].spectateurs[socket.id]) {
         const nickname = rooms[room].nicknames[socket.id];
-        delete rooms[room].spectators[socket.id];
+        delete rooms[room].spectateurs[socket.id];
         delete rooms[room].nicknames[socket.id];
         if (
-          Object.keys(rooms[room].spectators).length === 0 &&
+          Object.keys(rooms[room].spectateurs).length === 0 &&
           Object.keys(rooms[room].players).length === 0
         ) {
           delete rooms[room];
         }
         checkQueue(room);
-        io.to(room).emit("message", `${nickname} left room ${room}`);
+        io.to(room).emit("message", `${nickname} a quitté la salle ${room}`);
       }
     }
     io.emit("roomsUpdate", getAvailableRooms());
@@ -189,26 +223,32 @@ io.on("connection", (socket) => {
 
 function determineWinner(choice1, choice2, player1, player2) {
   if (choice1 === choice2) {
-    return "Draw";
+    return "Égalité";
   }
   if (
-    (choice1 === "rock" && choice2 === "scissors") ||
-    (choice1 === "scissors" && choice2 === "paper") ||
-    (choice1 === "paper" && choice2 === "rock")
+    (choice1 === "pierre" && choice2 === "sciseaux") ||
+    (choice1 === "sciseaux" && choice2 === "paper") ||
+    (choice1 === "paper" && choice2 === "pierre")
   ) {
-    return `${player1} wins`;
+    return `${player1} gagne avec ${choice1} contre ${player2} avec ${choice2}`;
   }
-  return `${player2} wins`;
+  return `${player2} gagne avec ${choice2} contre ${player1} avec ${choice1}`;
 }
 
 function getAvailableRooms() {
   let availableRooms = [];
   let fullRooms = [];
   for (let room in rooms) {
+    const roomInfo = {
+      name: room,
+      count:
+        Object.keys(rooms[room].players).length +
+        Object.keys(rooms[room].spectators).length,
+    };
     if (Object.keys(rooms[room].players).length < 2) {
-      availableRooms.push(room);
+      availableRooms.push(roomInfo);
     } else {
-      fullRooms.push(room);
+      fullRooms.push(roomInfo);
     }
   }
   return { availableRooms, fullRooms };
